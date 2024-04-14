@@ -5,12 +5,12 @@ import time
 
 # Define variables for the paths
 KEIL_UV4_PATH = r"C:\Keil_v5\UV4\uv4.exe"
-PROJECT_DIRECTORY = r"C:\Users\Administrator\Desktop\test\USER"
-PROJECT_NAME = "test"
+PROJECT_DIRECTORY = r"E:\0-study\5-xhsc\mcu_autotest\timer\projects\ev_hc32f448_lqfp80\examples\timer0\timer0_basetimer\MDK"
+PROJECT_NAME = "timer0_basetimer"
 PROJECT_EXTENSION = ".uvprojx"
 TARGET_NAME = "Debug"
-JLINK_PATH = r"C:\Program Files (x86)\SEGGER\JLink_V630d\JLink.exe"
-HEX_FILE = r"C:\Users\Administrator\Desktop\test\OBJ\test.hex"
+JLINK_PATH = r"D:\SEGGER\SEGGER\JLink_V630d\JLink.exe"
+HEX_FILE = r"E:\0-study\5-xhsc\mcu_autotest\timer\projects\ev_hc32f448_lqfp80\examples\timer0\timer0_basetimer\MDK\output\debug\timer0_basetimer.hex"
 # Set your MCU model (ensure it matches a device supported by J-Link)
 MCU_TYPE = "HC32F448"
 # Set the J-Link interface and speed (modify based on your hardware)
