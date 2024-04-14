@@ -4,19 +4,25 @@ import datetime
 import time
 
 # Define variables for the paths
+# 获取当前脚本所在的目录  
+current_script_directory = os.path.dirname(os.path.abspath(__file__))  
+
+# 根据当前脚本目录构造工程目录和 HEX 文件目录  
+# 假设工程目录和 HEX 文件目录都在当前脚本的上一级目录的某个子目录中  
+PROJECT_DIRECTORY = os.path.join(current_script_directory, "..", "mcu_autotest", "timer", "projects", "ev_hc32f448_lqfp80", "examples", "timer0", "timer0_basetimer", "MDK")  
+HEX_FILE_DIRECTORY = os.path.join(PROJECT_DIRECTORY, "output", "debug")  
+HEX_FILE = os.path.join(HEX_FILE_DIRECTORY, "timer0_basetimer.hex") 
+PROJECT_NAME = "timer0_basetimer"  
+PROJECT_EXTENSION = ".uvprojx" 
 KEIL_UV4_PATH = r"C:\Keil_v5\UV4\uv4.exe"
-PROJECT_DIRECTORY = r"E:\0-study\5-xhsc\mcu_autotest\timer\projects\ev_hc32f448_lqfp80\examples\timer0\timer0_basetimer\MDK"
-PROJECT_NAME = "timer0_basetimer"
-PROJECT_EXTENSION = ".uvprojx"
+
 TARGET_NAME = "Debug"
 JLINK_PATH = r"D:\SEGGER\SEGGER\JLink_V630d\JLink.exe"
-HEX_FILE = r"E:\0-study\5-xhsc\mcu_autotest\timer\projects\ev_hc32f448_lqfp80\examples\timer0\timer0_basetimer\MDK\output\debug\timer0_basetimer.hex"
 # Set your MCU model (ensure it matches a device supported by J-Link)
 MCU_TYPE = "HC32F448"
 # Set the J-Link interface and speed (modify based on your hardware)
 INTERFACE = "SWD"
 SPEED = 4000
-
 def compile_keil_project(project_path, target_name):
     # Check if uv4.exe exists using the defined variable
     if not os.path.exists(KEIL_UV4_PATH):
