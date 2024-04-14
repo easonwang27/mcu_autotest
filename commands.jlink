@@ -1,0 +1,5 @@
+erase
+loadfile C:\Users\Administrator\Desktop\test\OBJ\test.hex
+r
+g
+exit
