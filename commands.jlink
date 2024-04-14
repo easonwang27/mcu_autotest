@@ -1,5 +1,5 @@
 erase
-loadfile e:\0-study\5-xhsc\mcu_autotest\..\mcu_autotest\timer\projects\ev_hc32f448_lqfp80\examples\timer0\timer0_basetimer\MDK\output\debug\timer0_basetimer.hex
+loadfile e:\0-study\5-xhsc\mcu_autotest\timer\projects\ev_hc32f448_lqfp80\examples\timer0\timer0_basetimer_8\MDK\output\debug\timer0_basetimer_8.hex
 r
 g
 exit

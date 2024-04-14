@@ -1,19 +1,9 @@
-import subprocess
-import os
+import os  
+import glob  
+import subprocess  
 import datetime
 import time
 
-# Define variables for the paths
-# 获取当前脚本所在的目录  
-current_script_directory = os.path.dirname(os.path.abspath(__file__))  
-
-# 根据当前脚本目录构造工程目录和 HEX 文件目录  
-# 假设工程目录和 HEX 文件目录都在当前脚本的上一级目录的某个子目录中  
-PROJECT_DIRECTORY = os.path.join(current_script_directory, "..", "mcu_autotest", "timer", "projects", "ev_hc32f448_lqfp80", "examples", "timer0", "timer0_basetimer", "MDK")  
-HEX_FILE_DIRECTORY = os.path.join(PROJECT_DIRECTORY, "output", "debug")  
-HEX_FILE = os.path.join(HEX_FILE_DIRECTORY, "timer0_basetimer.hex") 
-PROJECT_NAME = "timer0_basetimer"  
-PROJECT_EXTENSION = ".uvprojx" 
 KEIL_UV4_PATH = r"C:\Keil_v5\UV4\uv4.exe"
 
 TARGET_NAME = "Debug"
@@ -23,15 +13,16 @@ MCU_TYPE = "HC32F448"
 # Set the J-Link interface and speed (modify based on your hardware)
 INTERFACE = "SWD"
 SPEED = 4000
-def compile_keil_project(project_path, target_name):
-    # Check if uv4.exe exists using the defined variable
+  
+def compile_keil_project(uvprojx_file, target_name):
+        # Check if uv4.exe exists using the defined variable
     if not os.path.exists(KEIL_UV4_PATH):
         print(f"Error: {KEIL_UV4_PATH} does not exist. Please ensure Keil uVision5 is installed correctly.")
         return False
-
     # Build the uv4 command using the defined variables
-    project_full_path = os.path.join(PROJECT_DIRECTORY, f"{PROJECT_NAME}{PROJECT_EXTENSION}")
-    command = [KEIL_UV4_PATH, '-batchbuild', project_full_path]
+    command = [KEIL_UV4_PATH, '-batchbuild', uvprojx_file]
+
+    print(f"uvprojx_file project: {uvprojx_file}") 
 
     try:
         # Start timing the compilation process
@@ -55,16 +46,17 @@ def compile_keil_project(project_path, target_name):
         print(e)
         return False
 
-def download_hex_with_jlink():
+
+def download_hex_with_jlink(hex_file_path, target_device):
     # Check if the HEX file exists
-    if not os.path.isfile(HEX_FILE):
-        print(f"Error: The HEX file {HEX_FILE} does not exist. Please ensure the compilation was successful.")
+    if not os.path.isfile(hex_file_path):
+        print(f"Error: The HEX file {hex_file_path} does not exist. Please ensure the compilation was successful.")
         return False
 
         # Create a script file for J-Link commands
     with open("commands.jlink", "w") as f:
         f.write("erase\n")
-        f.write(f"loadfile {HEX_FILE}\n")
+        f.write(f"loadfile {hex_file_path}\n")
         f.write("r\n")  # Reset MCU
         f.write("g\n")  # Start executing MCU
         f.write("exit\n")
@@ -95,32 +87,49 @@ def download_hex_with_jlink():
             print(f"Error occurred while deleting the temporary script file: {e}")
 
         # Call the functions to compile the project and download the HEX file
-
-
-
-def main():
-    # Compile the project using the defined variables
-    if compile_keil_project(None, TARGET_NAME):  # Pass None for project_path because it's built within the function
-        # Compilation was successful, allowing for further tasks such as generating reports or deploying
-        print("Compilation successful. Can proceed with other automation tasks...")
-        
-        # Wait for a period to ensure the HEX file has been generated
-        wait_time = 5  
-        time.sleep(wait_time)
-
-        # Download the HEX file to the MCU
-        if download_hex_with_jlink():
-            # Download was successful, allowing for further tasks
-            print("HEX file downloaded successfully.")
+  
+  
+def main():  
+    # 获取当前工作目录  
+    current_directory = os.getcwd()  
+  
+    # 使用glob查找所有后缀为.uvprojx的文件  
+    uvprojx_files = glob.glob(os.path.join(current_directory, '**', '*.uvprojx'), recursive=True)  
+  
+    # 遍历每个uvprojx文件  
+    for uvprojx_file in uvprojx_files:  
+        # 编译工程  
+        if compile_keil_project(uvprojx_file, TARGET_NAME):
+             # Compilation was successful, allowing for further tasks such as generating reports or deploying
+            print("Compilation successful. Can proceed with other automation tasks...")
+            # Wait for a period to ensure the HEX file has been generated
+            wait_time = 5  
+            time.sleep(wait_time)
+            # 获取工程名（不带后缀）  
+            project_name = os.path.splitext(os.path.basename(uvprojx_file))[0]  
+            print(f"Processing project: {project_name}") 
+             # 假设hex文件在output/debug目录下，并且文件名与工程名相同  
+            hex_file_dir = os.path.join(os.path.dirname(uvprojx_file), 'output', 'debug')  
+            hex_file_path = os.path.join(hex_file_dir, f"{project_name}.hex")  
+            print(f"Processing HEX: {hex_file_path}")
+             # 检查hex文件是否存在  
+            if os.path.exists(hex_file_path):      
+                print(f"Processing HEX: {hex_file_path}") 
+                # Download the HEX file to the MCU
+                if download_hex_with_jlink(hex_file_path, MCU_TYPE):
+                    # Download was successful, allowing for further tasks
+                    print("HEX file downloaded successfully.")
+                else:
+                # Download failed, handle the error
+                    print("Failed to download the HEX file.")
+            # Additional error handling code can be placed here (e.g., logging, retries, etc.)  
+            else:  
+                print(f"Hex file not found for project: {project_name}")  
         else:
-            # Download failed, handle the error
-            print("Failed to download the HEX file.")
-            # Additional error handling code can be placed here (e.g., logging, retries, etc.)
-    else:
-        # Compilation failed, perform necessary error handling steps
-        print("Compilation failed.")
-        # Additional error handling code can be placed here (e.g., logging, notifications, etc.)
+            # Compilation failed, perform necessary error handling steps
+            print("Compilation failed.")
+            # Additional error handling code can be placed here (e.g., logging, notifications, etc.)
 
-# Call the main function if this script is executed directly
-if __name__ == "__main__":
+    print("Compilation and download completed.")  
+if __name__ == "__main__":  
     main()
