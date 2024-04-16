@@ -3,8 +3,9 @@ import glob
 import subprocess  
 import datetime
 import time
-# Define variables for the paths
+
 KEIL_UV4_PATH = r"C:\Keil_v5\UV4\uv4.exe"
+
 TARGET_NAME = "Debug"
 JLINK_PATH = r"D:\SEGGER\SEGGER\JLink_V630d\JLink.exe"
 # Set your MCU model (ensure it matches a device supported by J-Link)
@@ -20,7 +21,9 @@ def compile_keil_project(uvprojx_file, target_name):
         return False
     # Build the uv4 command using the defined variables
     command = [KEIL_UV4_PATH, '-batchbuild', uvprojx_file]
+
     print(f"uvprojx_file project: {uvprojx_file}") 
+
     try:
         # Start timing the compilation process
         start_time = datetime.datetime.now()
@@ -28,6 +31,7 @@ def compile_keil_project(uvprojx_file, target_name):
         result = subprocess.run(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
         # Stop timing the compilation process
         end_time = datetime.datetime.now()
+
         # Output the compilation result
         if result.returncode == 0:
             print(f"Compilation completed successfully. Time taken: {end_time - start_time}")
@@ -86,42 +90,29 @@ def download_hex_with_jlink(hex_file_path, target_device):
   
   
 def main():  
-    """
-    This function is responsible for compiling and downloading Keil uVision projects (*.uvprojx) 
-    from the current working directory. It uses glob to find all files with the specified suffix,
-    then traverses each file to compile it using the `compile_keil_project` function. If compilation
-    is successful, it waits for a specified period to ensure the HEX file has been generated,
-    then processes the HEX file by downloading it to the MCU using the `download_hex_with_jlink` function.
-    If any errors occur during the process, appropriate error handling steps are performed.
-    
-    Args:
-        None
-    
-    Returns:
-        None
-    
-    """
-    # Get the current working directory
+    # 获取当前工作目录  
     current_directory = os.getcwd()  
-    # Use glob to find all files with the suffix. uvprojx  
+  
+    # 使用glob查找所有后缀为.uvprojx的文件  
     uvprojx_files = glob.glob(os.path.join(current_directory, '**', '*.uvprojx'), recursive=True)  
-    # Traverse each uvprojx file 
+  
+    # 遍历每个uvprojx文件  
     for uvprojx_file in uvprojx_files:  
-        # Compiling a Project  
+        # 编译工程  
         if compile_keil_project(uvprojx_file, TARGET_NAME):
              # Compilation was successful, allowing for further tasks such as generating reports or deploying
             print("Compilation successful. Can proceed with other automation tasks...")
             # Wait for a period to ensure the HEX file has been generated
             wait_time = 5  
             time.sleep(wait_time)
-            # Get project name (without suffix)  
+            # 获取工程名（不带后缀）  
             project_name = os.path.splitext(os.path.basename(uvprojx_file))[0]  
             print(f"Processing project: {project_name}") 
-             #The hex file is located in the output/debug directory and has the same file name as the project name 
+             # 假设hex文件在output/debug目录下，并且文件名与工程名相同  
             hex_file_dir = os.path.join(os.path.dirname(uvprojx_file), 'output', 'debug')  
             hex_file_path = os.path.join(hex_file_dir, f"{project_name}.hex")  
             print(f"Processing HEX: {hex_file_path}")
-             # Check if the hex file exists  
+             # 检查hex文件是否存在  
             if os.path.exists(hex_file_path):      
                 print(f"Processing HEX: {hex_file_path}") 
                 # Download the HEX file to the MCU
