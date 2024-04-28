@@ -1,0 +1,2 @@
+The capture value:
+TIMER_TEST_009 test  result is: PASS

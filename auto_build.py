@@ -3,6 +3,8 @@ import glob
 import subprocess  
 import datetime
 import time
+import serial_reader  
+
 # Define variables for the paths
 KEIL_UV4_PATH = r"C:\Keil_v5\UV4\uv4.exe"
 TARGET_NAME = "Debug"
@@ -14,6 +16,17 @@ INTERFACE = "SWD"
 SPEED = 4000
   
 def compile_keil_project(uvprojx_file, target_name):
+    """
+    使用Keil uVision5的命令行工具uv4.exe编译Keil工程文件(.uvprojx)
+    
+    Args:
+        uvprojx_file (str): Keil工程文件(.uvprojx)的路径
+        target_name (str): 目标名称
+    
+    Returns:
+        bool: 编译成功返回True，否则返回False
+    
+    """
         # Check if uv4.exe exists using the defined variable
     if not os.path.exists(KEIL_UV4_PATH):
         print(f"Error: {KEIL_UV4_PATH} does not exist. Please ensure Keil uVision5 is installed correctly.")
@@ -31,6 +44,20 @@ def compile_keil_project(uvprojx_file, target_name):
         # Output the compilation result
         if result.returncode == 0:
             print(f"Compilation completed successfully. Time taken: {end_time - start_time}")
+            #if 1
+            # 使用os.path.splitext分割文件名和扩展名  
+            _logname, file_extension = os.path.splitext(uvprojx_file)  
+            # 替换扩展名为.log  
+            logname = _logname + '.log'  
+            print(logname)  # 输出新的文件路径
+            with open(logname, 'w') as file:  
+             # 不写入任何内容，文件将是空的  
+                pass 
+            try:  
+                serial_reader.start_serial_reader( 'COM7', 115200, logname)
+            except KeyboardInterrupt:  
+             print("Program interrupted by user.")
+        #endif
             return True
         else:
             print("Compilation failed. Error details follow:")
@@ -44,6 +71,17 @@ def compile_keil_project(uvprojx_file, target_name):
 
 
 def download_hex_with_jlink(hex_file_path, target_device):
+    """
+    使用J-Link下载HEX文件到目标设备
+    
+    Args:
+        hex_file_path (str): HEX文件路径
+        target_device (str): 目标设备名称
+    
+    Returns:
+        bool: 下载是否成功
+    
+    """
     # Check if the HEX file exists
     if not os.path.isfile(hex_file_path):
         print(f"Error: The HEX file {hex_file_path} does not exist. Please ensure the compilation was successful.")
@@ -101,6 +139,9 @@ def main():
         None
     
     """
+   # port = 'COM7'  # 串口端口号，根据您的实际串口修改  
+   # baudrate = 115200  # 波特率，根据您的设备配置修改  
+   # data_save_path = 'serial_data.txt'  # 数据保存的文件路径  
     # Get the current working directory
     current_directory = os.getcwd()  
     # Use glob to find all files with the suffix. uvprojx  
